@@ -265,50 +265,41 @@ void Dot::move(SDL_Rect* walls)
 	//Move the dot left or right
 	mPosX += mVelX;
 	mCollider.x = mPosX;
-	for (int i = 0; i < 10; i++) {
+	for (int i = 0; i < 30; i++) {
 		if (checkCollision(mCollider, walls[i])) {
+			cout << "Twoje zycie = " << hp << endl;;
 			hp -= 10;
 			mPosX -= mVelX;
 			mCollider.x = mPosX;
 
 
 		}
+	}
+	if ((mPosX < 0) || (mPosX + DOT_WIDTH > SCREEN_WIDTH))
+	{
+		
+		cout << "Twoje zycie = " << hp << endl;;
+		hp -= 10;
+		mPosX -= mVelX;
+		mCollider.x = mPosX;
+	}
+	mPosY += mVelY;
+	mCollider.y = mPosY;
+
+	if ((mPosY < 0) || (mPosY + DOT_HEIGHT > SCREEN_HEIGHT))
+	{
+		mPosY -= mVelY;
+		mCollider.y = mPosY;
+	}
+	for (int i = 0; i < 30; i++) {
 		if (checkCollision(mCollider, walls[i])) {
+			cout << "Twoje zycie = " << hp << endl;;
 			hp -= 10;
 			mPosY -= mVelY;
 			mCollider.y = mPosY;
 
 
 		}
-
-	}
-	//If the dot collided or went too far to the left or right
-	if ((mPosX < 0))
-	{
-		//Move back
-		cout << "Twoje zycie = " << hp << endl;;
-		hp -= 10;
-		mPosX -= mVelX;
-		mCollider.x = mPosX;
-	}
-	else if ((mPosX + DOT_WIDTH > SCREEN_WIDTH)) {
-		cout << "Twoje zycie = " << hp << endl;;
-		hp -= 10;
-		mPosX -= mVelX;
-		mCollider.x = mPosX;
-	}
-
-	//Move the dot up or down
-	mPosY += mVelY;
-	mCollider.y = mPosY;
-
-	//If the dot collided or went too far up or down
-	if ((mPosY < 0) || (mPosY + DOT_HEIGHT > SCREEN_HEIGHT))
-	{
-
-		//Move back
-		mPosY -= mVelY;
-		mCollider.y = mPosY;
 	}
 }
 
@@ -332,7 +323,7 @@ bool init()
 	else
 	{
 		//Set texture filtering to linear
-		if (!SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1"))
+		if (!SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0"))
 		{
 			printf("Warning: Linear texture filtering not enabled!");
 		}
@@ -479,10 +470,10 @@ int main(int argc, char* args[])
 			wall.y = 40;
 			wall.w = 40;
 			wall.h = 400;
-			SDL_Rect walls[10];
-			for (int i = 0; i < 10; i++) {
-				walls[i].x = 30 + i * 50;
-				walls[i].y = 10 + i * 25;
+			SDL_Rect walls[30];
+			for (int i = 0; i < 30; i++) {
+				walls[i].x = rand() % 500;
+				walls[i].y = rand() % 300;
 				walls[i].w = 30;
 				walls[i].h = 60;
 			}
@@ -516,12 +507,13 @@ int main(int argc, char* args[])
 				SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF);
 				SDL_RenderDrawRect(gRenderer, &wall);
 
+				
+
 				SDL_SetRenderDrawColor(gRenderer, 0x00, 0xFD, 0x23, 0xFF);
-				for (int i = 0; i < 10; i++) {
+				for (int i = 0; i < 30; i++) {
 					SDL_RenderFillRect(gRenderer, &walls[i]);
 				}
-				SDL_SetRenderDrawColor(gRenderer, 0xBE, 0xEA, 0xC4, 0xFF);
-				SDL_RenderFillRect(gRenderer, &dot.mCollider);
+				
 				//Render dot
 				dot.render();
 
