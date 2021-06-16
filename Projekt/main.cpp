@@ -1,7 +1,4 @@
-/*This source code copyrighted by Lazy Foo' Productions (2004-2020)
-and may not be redistributed without written permission.*/
 
-//Using SDL, SDL_image, standard IO, and strings
 #include <SDL.h>
 #include <SDL_image.h>
 #include <stdio.h>
@@ -70,7 +67,7 @@ public:
 	void handleEvent(SDL_Event& e);
 
 	//Moves the dot and checks collision
-	void move(SDL_Rect& wall);
+	void move(SDL_Rect walls[10]);
 
 	//Shows the dot on the screen
 	void render();
@@ -83,7 +80,7 @@ private:
 	//The X and Y offsets of the dot
 	int mPosX, mPosY;
 
-	
+
 };
 
 //Starts up SDL and creates window
@@ -263,28 +260,40 @@ void Dot::handleEvent(SDL_Event& e)
 	}
 }
 
-void Dot::move(SDL_Rect& wall)
+void Dot::move(SDL_Rect* walls)
 {
 	//Move the dot left or right
 	mPosX += mVelX;
 	mCollider.x = mPosX;
+	for (int i = 0; i < 10; i++) {
+		if (checkCollision(mCollider, walls[i])) {
+			hp -= 10;
+			mPosX -= mVelX;
+			mCollider.x = mPosX;
 
+
+		}
+		if (checkCollision(mCollider, walls[i])) {
+			hp -= 10;
+			mPosY -= mVelY;
+			mCollider.y = mPosY;
+
+
+		}
+
+	}
 	//If the dot collided or went too far to the left or right
 	if ((mPosX < 0))
 	{
 		//Move back
 		cout << "Twoje zycie = " << hp << endl;;
 		hp -= 10;
-		mPosX -= mVelX-40;
+		mPosX -= mVelX;
 		mCollider.x = mPosX;
 	}
 	else if ((mPosX + DOT_WIDTH > SCREEN_WIDTH)) {
 		cout << "Twoje zycie = " << hp << endl;;
 		hp -= 10;
-		mPosX -= mVelX+40;
-		mCollider.x = mPosX;
-	}
-	else if (checkCollision(mCollider, wall)) {
 		mPosX -= mVelX;
 		mCollider.x = mPosX;
 	}
@@ -294,9 +303,9 @@ void Dot::move(SDL_Rect& wall)
 	mCollider.y = mPosY;
 
 	//If the dot collided or went too far up or down
-	if ((mPosY < 0) || (mPosY + DOT_HEIGHT > SCREEN_HEIGHT) || checkCollision(mCollider, wall))
+	if ((mPosY < 0) || (mPosY + DOT_HEIGHT > SCREEN_HEIGHT))
 	{
-		
+
 		//Move back
 		mPosY -= mVelY;
 		mCollider.y = mPosY;
@@ -457,7 +466,7 @@ int main(int argc, char* args[])
 		{
 			//Main loop flag
 			bool quit = false;
-			
+
 			//Event handler
 			SDL_Event e;
 
@@ -470,7 +479,14 @@ int main(int argc, char* args[])
 			wall.y = 40;
 			wall.w = 40;
 			wall.h = 400;
-			
+			SDL_Rect walls[10];
+			for (int i = 0; i < 10; i++) {
+				walls[i].x = 30 + i * 50;
+				walls[i].y = 10 + i * 25;
+				walls[i].w = 30;
+				walls[i].h = 60;
+			}
+
 			//While application is running
 			while (!quit)
 			{
@@ -488,7 +504,10 @@ int main(int argc, char* args[])
 				}
 
 				//Move the dot and check collision
-				dot.move(wall);
+
+				dot.move(walls);
+
+
 				//Clear screen
 				SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
 				SDL_RenderClear(gRenderer);
@@ -497,6 +516,10 @@ int main(int argc, char* args[])
 				SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF);
 				SDL_RenderDrawRect(gRenderer, &wall);
 
+				SDL_SetRenderDrawColor(gRenderer, 0x00, 0xFD, 0x23, 0xFF);
+				for (int i = 0; i < 10; i++) {
+					SDL_RenderFillRect(gRenderer, &walls[i]);
+				}
 				SDL_SetRenderDrawColor(gRenderer, 0xBE, 0xEA, 0xC4, 0xFF);
 				SDL_RenderFillRect(gRenderer, &dot.mCollider);
 				//Render dot
