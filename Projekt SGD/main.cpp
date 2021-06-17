@@ -18,6 +18,7 @@ bool loadMedia();
 //Frees media and shuts down SDL
 void close();
 
+bool checkCollision(SDL_Rect a, SDL_Rect b);
 
 //The window we'll be rendering to
 SDL_Window* gWindow = NULL;
@@ -121,7 +122,7 @@ public:
 	float xSpeed;
 	float ySpeed;
 	float speed;
-	void move();
+	void move(SDL_Rect przeszkoda);
 
 };
 Ship::Ship() {
@@ -134,11 +135,24 @@ Ship::Ship() {
 	ShipHull.h = 100;
 
 }
-void Ship::move() {
+void Ship::move(SDL_Rect przeszkoda) {
+	
+
 	xPos += xSpeed;
 	yPos += ySpeed;
 	ShipHull.x = xPos;
 	ShipHull.y = yPos;
+
+	if (checkCollision(przeszkoda, ShipHull)) {
+		xPos -= xSpeed;
+		cout << "kolizja";
+	}
+
+
+	if (checkCollision(przeszkoda, ShipHull)) {
+		yPos -= ySpeed;
+		cout << "kolizja";
+	}
 	cout << "ShipHull.x = " << ShipHull.x << " " << "ShipHull.y = " << ShipHull.x << endl;
 }
 void Ship::handleEvent(SDL_Event& e) {
@@ -208,7 +222,7 @@ bool checkCollision(SDL_Rect a, SDL_Rect b)
     topB = b.y;
     bottomB = b.y + b.h;
 
-    //If any of the sides from A are outside of B
+    
     if (bottomA <= topB)
     {
         return false;
@@ -229,7 +243,7 @@ bool checkCollision(SDL_Rect a, SDL_Rect b)
         return false;
     }
 
-    //If none of the sides from A are outside B
+   
     return true;
 }
 int main(int argc, char* args[])
@@ -237,8 +251,8 @@ int main(int argc, char* args[])
 
 	Ship ship;
 	SDL_Rect screenRect = { 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT };
-
-
+	SDL_Rect obstacle = { 300,100,100,100 };
+	
 	if (!init())
 	{
 		printf("Failed to initialize!\n");
@@ -272,18 +286,19 @@ int main(int argc, char* args[])
 			}
 
 			
-			ship.move();
-
+			ship.move(obstacle);
+		
 			//Clear screen
-			SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xB4, 0xFF);
+			SDL_SetRenderDrawColor(gRenderer, 42, 123, 33, 255);
+			
 			SDL_RenderClear(gRenderer);
 
 
 
 
 			//player.x = Time() / 5;
-
-
+			SDL_SetRenderDrawColor(gRenderer, 42, 255, 255, 255);
+			SDL_RenderFillRect(gRenderer, &obstacle);
 			//render textury
 			SDL_RenderCopy(gRenderer, texture, &screenRect, &ship.ShipHull);
 
