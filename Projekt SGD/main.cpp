@@ -1,7 +1,4 @@
-/*This source code copyrighted by Lazy Foo' Productions (2004-2020)
-and may not be redistributed without written permission.*/
 
-//Using SDL, SDL_image, standard IO, math, and strings
 #include <SDL.h>
 #include <SDL_image.h>
 #include <stdio.h>
@@ -48,35 +45,35 @@ bool init()
 		printf("SDL could not initialize! SDL Error: %s\n", SDL_GetError());
 		success = false;
 	}
-	
-		//Create window
-		gWindow = SDL_CreateWindow("Hellow World", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
-		if (gWindow == NULL)
-		{
-			printf("Window could not be created! SDL Error: %s\n", SDL_GetError());
-			success = false;
-		}
-		
-			//Create renderer for window
-			gRenderer = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_ACCELERATED);
 
-			if (gRenderer == NULL)
-			{
-				printf("Renderer could not be created! SDL Error: %s\n", SDL_GetError());
-				success = false;
-			}
-			
-				//Initialize renderer color
-			SDL_SetRenderDrawColor(gRenderer, 255, 255, 255, 255);
-			int imgFlaga = IMG_INIT_PNG;
+	//Create window
+	gWindow = SDL_CreateWindow("Hellow World", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+	if (gWindow == NULL)
+	{
+		printf("Window could not be created! SDL Error: %s\n", SDL_GetError());
+		success = false;
+	}
 
-			if(!(IMG_Init(imgFlaga) & imgFlaga)) {
-					printf("SDL_IMAGE nie zostal zainicjalizowany %s\n ", IMG_GetError());
-					return false;
-			}
-			
-		
-			
+	//Create renderer for window
+	gRenderer = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_ACCELERATED);
+
+	if (gRenderer == NULL)
+	{
+		printf("Renderer could not be created! SDL Error: %s\n", SDL_GetError());
+		success = false;
+	}
+
+	//Initialize renderer color
+	SDL_SetRenderDrawColor(gRenderer, 255, 255, 255, 255);
+	int imgFlaga = IMG_INIT_PNG;
+
+	if (!(IMG_Init(imgFlaga) & imgFlaga)) {
+		printf("SDL_IMAGE nie zostal zainicjalizowany %s\n ", IMG_GetError());
+		return false;
+	}
+
+
+
 
 	return success;
 }
@@ -91,12 +88,12 @@ SDL_Texture* LoadTexture(std::string file) {
 	}
 	else
 	{
-			
-		newTexture = SDL_CreateTextureFromSurface(gRenderer, loadedSurface);
-		if (newTexture == NULL) 
-			printf("nie stworzono textury %s\n",file.c_str(), SDL_GetError());
 
-		
+		newTexture = SDL_CreateTextureFromSurface(gRenderer, loadedSurface);
+		if (newTexture == NULL)
+			printf("nie stworzono textury %s\n", file.c_str(), SDL_GetError());
+
+
 		SDL_FreeSurface(loadedSurface);
 	}
 	return newTexture;
@@ -119,11 +116,11 @@ public:
 	SDL_Rect ShipHull;
 	Ship();
 	void handleEvent(SDL_Event& e);
-	int xPos;
-	int yPos;
-	int xSpeed;
-	int ySpeed;
-	int speed;
+	float xPos;
+	float yPos;
+	float xSpeed;
+	float ySpeed;
+	float speed;
 	void move();
 
 };
@@ -132,10 +129,10 @@ Ship::Ship() {
 	yPos = 0;
 	ySpeed = 0;
 	xSpeed = 0;
-	speed = 1;
+	speed = 0.3;
 	ShipHull.w = 100;
 	ShipHull.h = 100;
-	
+
 }
 void Ship::move() {
 	xPos += xSpeed;
@@ -147,108 +144,160 @@ void Ship::move() {
 void Ship::handleEvent(SDL_Event& e) {
 	if (e.type == SDL_KEYDOWN && e.key.repeat == 0)
 	{
-		
+
 		switch (e.key.keysym.sym)
 		{
 		case SDLK_UP:
+			
 			ySpeed -= speed;
 			break;
 		case SDLK_DOWN:
+			
 			ySpeed += speed;
 			break;
 		case SDLK_LEFT:
+			
 			xSpeed -= speed;
 			break;
 		case SDLK_RIGHT:
+			
 			xSpeed += speed;
 			break;
 		}
-	}
-	else if (e.type == SDL_KEYUP && e.key.repeat == 0)
+	}else if (e.type == SDL_KEYUP && e.key.repeat == 0)
 	{
 		//Adjust the velocity
 		switch (e.key.keysym.sym)
 		{
 		case SDLK_UP:
-			ySpeed -= speed;
-			break;
-		case SDLK_DOWN:
+			
 			ySpeed += speed;
 			break;
+		case SDLK_DOWN:
+			
+			ySpeed -= speed;
+			break;
 		case SDLK_LEFT:
-			xSpeed -= speed;
+			
+			xSpeed += speed;
 			break;
 		case SDLK_RIGHT:
-			xSpeed += speed;
+			
+			xSpeed -= speed;
 			break;
 		}
 	}
 }
+bool checkCollision(SDL_Rect a, SDL_Rect b)
+{
+    //The sides of the rectangles
+    int leftA, leftB;
+    int rightA, rightB;
+    int topA, topB;
+    int bottomA, bottomB;
+
+    //Calculate the sides of rect A
+    leftA = a.x;
+    rightA = a.x + a.w;
+    topA = a.y;
+    bottomA = a.y + a.h;
+
+    //Calculate the sides of rect B
+    leftB = b.x;
+    rightB = b.x + b.w;
+    topB = b.y;
+    bottomB = b.y + b.h;
+
+    //If any of the sides from A are outside of B
+    if (bottomA <= topB)
+    {
+        return false;
+    }
+
+    if (topA >= bottomB)
+    {
+        return false;
+    }
+
+    if (rightA <= leftB)
+    {
+        return false;
+    }
+
+    if (leftA >= rightB)
+    {
+        return false;
+    }
+
+    //If none of the sides from A are outside B
+    return true;
+}
 int main(int argc, char* args[])
-{	
+{
 
 	Ship ship;
 	SDL_Rect screenRect = { 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT };
-	
-	
+
+
 	if (!init())
 	{
 		printf("Failed to initialize!\n");
 	}
 	else
-	{	
+	{
 		texture = LoadTexture("dot.png");
 		if (texture == NULL) {
 			printf("failed to load obrazek");
 			return -1;
 		}
-		
-			//Main loop flag
-			bool quit = false;
 
-			//Event handler
-			SDL_Event e;
+		//Main loop flag
+		bool quit = false;
 
-			//While application is running
-			while (!quit)
+		//Event handler
+		SDL_Event e;
+
+		//While application is running
+		while (!quit)
+		{
+			//Handle events on queue
+			while (SDL_PollEvent(&e) != 0)
 			{
-				//Handle events on queue
-				while (SDL_PollEvent(&e) != 0)
+				//User requests quit
+				if (e.type == SDL_QUIT)
 				{
-					//User requests quit
-					if (e.type == SDL_QUIT)
-					{
-						quit = true;
-					}
-					
+					quit = true;
 				}
 				ship.handleEvent(e);
-				ship.move();
-				
-				//Clear screen
-				SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xB4, 0xFF);
-				SDL_RenderClear(gRenderer);
-
-				
-				
-				
-				//player.x = Time() / 5;
-			
-				
-				//render textury
-				SDL_RenderCopy(gRenderer, texture, &screenRect, &ship.ShipHull);
-
-
-				
-				
-				
-
-				
-
-				//Update screen
-				SDL_RenderPresent(gRenderer);
 			}
-		
+
+			
+			ship.move();
+
+			//Clear screen
+			SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xB4, 0xFF);
+			SDL_RenderClear(gRenderer);
+
+
+
+
+			//player.x = Time() / 5;
+
+
+			//render textury
+			SDL_RenderCopy(gRenderer, texture, &screenRect, &ship.ShipHull);
+
+
+
+
+
+
+
+
+			//Update screen
+			SDL_RenderPresent(gRenderer);
+		}
+
 	}
 
 	//Free resources and close SDL
