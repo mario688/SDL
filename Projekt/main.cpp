@@ -152,48 +152,65 @@ void Ship::move(SDL_Rect przeszkoda)
     yPos += ySpeed;
     ShipHull.x = xPos;
     ShipHull.y = yPos;
-    
-    if (checkCollision(ShipHull, przeszkoda) != 3) {
+
+    if (checkCollision(ShipHull, przeszkoda) != 3 && (yPos + ShipHull.h < SCREEN_HEIGHT))
+    {
         yPos += ySpeed + gravity;
     }
-
-    if (checkCollision(ShipHull, przeszkoda) == 3) {
+    if (checkCollision(ShipHull, przeszkoda) != 3 || (yPos + ShipHull.h > SCREEN_HEIGHT))
+    {
+    }
+    if (checkCollision(ShipHull, przeszkoda) == 3)
+    {
         yPos -= ySpeed;
         xPos += xSpeed;
     }
-    if (checkCollision(ShipHull, przeszkoda) == 4) {
+    if (checkCollision(ShipHull, przeszkoda) == 4)
+    {
         xPos -= xSpeed;
         yPos += ySpeed;
     }
-    if (checkCollision(ShipHull, przeszkoda) == 5) {
+    if (checkCollision(ShipHull, przeszkoda) == 5)
+    {
         xPos -= xSpeed;
         yPos += ySpeed;
     }
-     if (checkCollision(ShipHull, przeszkoda) == 6) {
-         yPos -= ySpeed - gravity;
-         xPos += xSpeed;
+    if (checkCollision(ShipHull, przeszkoda) == 6)
+    {
+        yPos -= ySpeed - gravity;
+        xPos += xSpeed;
     }
-   
-   
+    if (yPos < 0)
+    {
+        yPos -= ySpeed - gravity;
+    }
+    if ((yPos + ShipHull.h > SCREEN_HEIGHT))
+    {
+
+        cout << "jest kolizja z dolem" << endl;
+        yPos -= ySpeed;
+    }
+    if (xPos < 0 || xPos + ShipHull.w > SCREEN_WIDTH)
+    {
+        xPos -= xSpeed;
+    }
 
     //cout << "ShipHull.x = " << ShipHull.x << " " << "ShipHull.y = " << ShipHull.x << endl;
 }
 int checkCollision(SDL_Rect a, SDL_Rect b)
 {
     i++;
-    //The sides of the rectangles
+
     int leftA, leftB;
     int rightA, rightB;
     int topA, topB;
     int bottomA, bottomB;
 
-    //Calculate the sides of rect A
     leftA = a.x;
     rightA = a.x + a.w;
     topA = a.y;
     bottomA = a.y + a.h;
 
-    //Calculate the sides of rect B
     leftB = b.x;
     rightB = b.x + b.w;
     topB = b.y;
@@ -201,26 +218,26 @@ int checkCollision(SDL_Rect a, SDL_Rect b)
 
     if ((bottomA + 1 == topB - 1 || bottomA + 1 == topB - 1) && rightA > leftB && rightB > leftA)
     {
-        cout << "JEst kolizja z góry " << i<<endl;
+        //cout << "JEst kolizja z góry " << i<<endl;
         return 3;
-    }else if ( (leftA + 1 == rightB-1 || leftA - 1 == rightB + 1) && (topB<bottomA && topA < bottomB ))
+    }
+    else if ((leftA + 1 == rightB - 1 || leftA - 1 == rightB + 1) && (topB < bottomA && topA < bottomB))
     {
-        cout << "JEst kolizja z lewej od gracza " << i << endl;
+        //cout << "JEst kolizja z lewej od gracza " << i << endl;
         return 4;
-    }else if ((rightA + 1 == leftB - 1 || rightA - 1 == leftB + 1) && (topB < bottomA && topA < bottomB))
-    {   
-        cout << "JEst kolizja z prawej od gracza " << i << endl;
-        return 5;
-    }else if ((topA + 1 == bottomB - 1 || topA - 1 == bottomB + 1) && rightA > leftB && rightB > leftA)
+    }
+    else if ((rightA + 1 == leftB - 1 || rightA - 1 == leftB + 1) && (topB < bottomA && topA < bottomB))
     {
-        cout << "JEst kolizja z dolu " << i << endl;
+        //cout << "JEst kolizja z prawej od gracza " << i << endl;
+        return 5;
+    }
+    else if ((topA + 1 == bottomB - 1 || topA - 1 == bottomB + 1) && rightA > leftB && rightB > leftA)
+    {
+        //cout << "JEst kolizja z dolu " << i << endl;
         return 6;
     }
-    
-        return 7;
-    
 
-   
+    return 7;
 }
 void Ship::handleEvent(SDL_Event& e)
 {
@@ -235,7 +252,7 @@ void Ship::handleEvent(SDL_Event& e)
             direction = "up";
             break;
         case SDLK_DOWN:
-            ySpeed += speed;
+            // cos zrobic
 
             direction = "down";
             break;
@@ -263,7 +280,7 @@ void Ship::handleEvent(SDL_Event& e)
             break;
         case SDLK_DOWN:
 
-            ySpeed -= speed;
+            // cos dodac
             break;
         case SDLK_LEFT:
 
