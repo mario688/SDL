@@ -37,6 +37,7 @@ SDL_Renderer* gRenderer = NULL;
 SDL_Texture* texture = NULL;
 double angle = 0;
 SDL_Texture* kladka = NULL;
+SDL_Texture* meta = NULL;
 
 SDL_RendererFlip flip = SDL_FLIP_NONE;
 using namespace std;
@@ -135,7 +136,7 @@ public:
     bool jump;
     float speed;
     float gravity;
-    void move(SDL_Rect walls[10]);
+    void move(SDL_Rect walls[10], SDL_Rect finish);
 };
 Ship::Ship()
 {
@@ -145,7 +146,7 @@ Ship::Ship()
     jump = false;
     xSpeed = 0;
     speed = 0.3;
-    gravity = 0.8;
+    gravity = 0.4;
     ShipHull.w = 32;
     ShipHull.h = 64;
 }
@@ -155,13 +156,16 @@ float Ship::getYPos() {
 }
 bool canJump;
 int oldPos;
-void Ship::move(SDL_Rect* walls)
+void Ship::move(SDL_Rect* walls, SDL_Rect finish)
 {
     
 
     // cout << yPos << endl;
     offSet = getYPos();
     //xPos += xSpeed;
+    if (checkCollision(ShipHull,finish) != 7) {
+        cout << "wygrales!!!" << endl;
+    }
     if (jump) {
 
         for (int i = 0; i < 10; i++) {
@@ -352,9 +356,9 @@ int main(int argc, char* args[])
     
     Ship ship;
     SDL_Rect screenRect = { 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT };
- 
+    bool doPrzodu = false;
     SDL_Rect floors[10];
-  
+    SDL_Rect finish;
     if (!init())
     {
         printf("Failed to initialize!\n");
@@ -363,23 +367,28 @@ int main(int argc, char* args[])
     {   int numberOfFlor =   -1;
         kladka = LoadTexture("loaded.png");
         texture = LoadTexture("player.png");
+        meta = LoadTexture("colors.png");
         for (int i = 0; i < 10; i++) {
             floors[i].w = 130 - i*10;
             floors[i].h = 30;
         }
        
-
+        finish.w = 100;
+        finish.h = 100;
+        finish.x = 850;
+        finish.y = 640;
         floors[0].x = 300;
-        floors[0].y = 740;
+        floors[0].y = 640;
         floors[1].x = 200;
-        floors[1].y = 640;
-        floors[2].x = 130;
+        floors[1].y = 500;
+        floors[2].x = 100;
+        floors[2].y = 400;
         floors[2].w = 10;
-        floors[2].y = 440;
-        floors[3].x = 400;
+        floors[3].x = 200;
         floors[3].y = 340;
-        floors[4].x = 600;
+        floors[4].x = 450;
         floors[4].y = 340;
+
        
         //Main loop flag
         bool quit = false;
@@ -402,20 +411,35 @@ int main(int argc, char* args[])
             }
             
          
-            ship.move(floors);
+            ship.move(floors, finish);
 
             //Clear screen
             SDL_SetRenderDrawColor(gRenderer, 42, 123, 33, 255);
 
             SDL_RenderClear(gRenderer);
-
+           
+            
+           /* if (floors[4].x == 500) {
+                doPrzodu = true;
+            }
+            else if (floors[4].x == 800) {
+                doPrzodu = false;
+            }
+             
+            if (doPrzodu) {
+                floors[4].x += Time() * 0.01;
+            }else if(!doPrzodu)
+                floors[4].x -= Time() * 0.01;*/
+            
+            
+            
             //player.x = Time() / 5;
             SDL_SetRenderDrawColor(gRenderer, 42, 255, 255, 255);
             //SDL_RenderCopy(gRenderer, kladka, &screenRect, &obstacle);
             for (int i = 0; i < 10; i++) {
                 SDL_RenderCopy(gRenderer, kladka, &screenRect, &floors[i]);
             }
-           
+            SDL_RenderCopy(gRenderer, meta, &screenRect, &finish);
             //render textury
             SDL_RenderCopyEx(gRenderer, texture, NULL, &ship.ShipHull, angle, NULL, flip);
 
