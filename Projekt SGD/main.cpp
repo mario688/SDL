@@ -22,6 +22,7 @@ bool init();
 
 //Frees media and shuts down SDL
 void close();
+Uint32 startTime;
 
 int checkCollision(SDL_Rect a, SDL_Rect b);
 
@@ -79,10 +80,12 @@ bool init()
         printf("SDL_IMAGE nie zostal zainicjalizowany %s\n ", IMG_GetError());
         return false;
     }
-
+    startTime = SDL_GetTicks();
     return success;
 }
-
+Uint32 Time() {
+    return SDL_GetTicks() - startTime;
+}
 SDL_Texture* LoadTexture(std::string file)
 {
     SDL_Texture* newTexture = NULL;
@@ -122,7 +125,6 @@ class Ship
 public:
     SDL_Rect ShipHull;
     Ship();
-    void Jump(SDL_Rect przeszkoda);
     float getYPos();
     void handleEvent(SDL_Event& e);
     int offSet;
@@ -142,7 +144,7 @@ Ship::Ship()
     yPos = 100;
     jump = false;
     xSpeed = 0;
-    speed = 0.1;
+    speed = 0.3;
     gravity = 0.8;
     ShipHull.w = 32;
     ShipHull.h = 64;
@@ -152,43 +154,44 @@ float Ship::getYPos() {
     return yPos;
 }
 bool canJump;
-
-
-void Ship::Jump(SDL_Rect przeszkoda) {
+int oldPos;
+void Ship::move(SDL_Rect przeszkoda)
+{
+    
+   // cout << yPos << endl;
+    offSet = getYPos();
+    //xPos += xSpeed;
     if (jump) {
-
+     
 
         if (checkCollision(ShipHull, przeszkoda) == 3 || yPos + ShipHull.h > SCREEN_HEIGHT) {
             canJump = true;
-
+            oldPos = yPos;
         }
         if (canJump) {
-            offSet -= 1;
+            
             if (checkCollision(ShipHull, przeszkoda) != 6) {
-                //offSet -= 1;
-                if (offSet < yPos - ShipHull.h * 2) {
+                offSet -= 1;
+                if (oldPos>yPos+150) {
                     cout << "Przekroczono limit" << endl;
+                    jump = false;
                 }
-            }
-           
-            cout << "offSet = " << offSet << " yPos = " << yPos << endl;
+              }
+           // cout << "offSet = " << offSet << " yPos = " << yPos << " oldPos = " << oldPos << endl;;
         }
-
+       
+        yPos = offSet;
     }
-}
-void Ship::move(SDL_Rect przeszkoda)
-{
-   // cout << yPos << endl;
-    offSet = getYPos();
     xPos += xSpeed;
-    
     ShipHull.x = xPos;
     ShipHull.y = yPos;
 
     if (checkCollision(ShipHull, przeszkoda) != 3 && (yPos + ShipHull.h < SCREEN_HEIGHT))
     {
+        
         yPos +=  gravity;
     }
+   
     
     if (checkCollision(ShipHull, przeszkoda) == 3)
     {
@@ -242,12 +245,12 @@ int checkCollision(SDL_Rect a, SDL_Rect b)
         //cout << "JEst kolizja z góry " << i<<endl;
         return 3;
     }
-    else if ((leftA + 1 == rightB - 1 || leftA - 1 == rightB + 1) && (topB < bottomA && topA < bottomB))
+    else if ((leftA  == rightB  || leftA == rightB ) && (topB < bottomA && topA < bottomB))
     {
         //cout << "JEst kolizja z lewej od gracza " << i << endl;
         return 4;
     }
-    else if ((rightA + 1 == leftB - 1 || rightA - 1 == leftB + 1) && (topB < bottomA && topA < bottomB))
+    else if ((rightA  == leftB  || rightA  == leftB ) && (topB < bottomA && topA < bottomB))
     {
         //cout << "JEst kolizja z prawej od gracza " << i << endl;
         return 5;
@@ -322,7 +325,7 @@ int main(int argc, char* args[])
 
     Ship ship;
     SDL_Rect screenRect = { 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT };
-    SDL_Rect obstacle = { 70, 200, 100, 100 };
+    SDL_Rect obstacle = { 100, 400, 300, 30 };
 
     if (!init())
     {
@@ -354,7 +357,7 @@ int main(int argc, char* args[])
             }
 
             ship.move(obstacle);
-            ship.Jump(obstacle);
+
             //Clear screen
             SDL_SetRenderDrawColor(gRenderer, 42, 123, 33, 255);
 
