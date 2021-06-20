@@ -28,7 +28,7 @@ int checkCollision(SDL_Rect a, SDL_Rect b);
 
 //The window we'll be rendering to
 SDL_Window* gWindow = NULL;
-
+bool win = false;
 SDL_Texture* LoadTexture(std::string file);
 
 //The window renderer
@@ -165,6 +165,7 @@ void Ship::move(SDL_Rect* walls, SDL_Rect finish)
     //xPos += xSpeed;
     if (checkCollision(ShipHull,finish) != 7) {
         cout << "wygrales!!!" << endl;
+        win = true;
     }
     if (jump) {
 
@@ -172,11 +173,17 @@ void Ship::move(SDL_Rect* walls, SDL_Rect finish)
             if ((checkCollision(ShipHull, walls[i]) == 3 || yPos + ShipHull.h > SCREEN_HEIGHT)) {
                 canJump = true;
                 oldPos = yPos;
+                
             }
+            if ((checkCollision(ShipHull, walls[i]) == 6))
+            {
+                jump = false;
+            }
+               
         }
         
         if (canJump) {
-            
+          
             if (checkCollision(ShipHull, walls[0]) != 6
                 && checkCollision(ShipHull, walls[1]) != 6
                 && checkCollision(ShipHull, walls[2]) != 6
@@ -193,6 +200,7 @@ void Ship::move(SDL_Rect* walls, SDL_Rect finish)
                 if (oldPos > yPos + 150) {
                     //cout << "Przekroczono limit wysokosci" << endl;
                     jump = false;
+                    canJump = false;
                 }
             }
             // cout << "offSet = " << offSet << " yPos = " << yPos << " oldPos = " << oldPos << endl;;
@@ -221,12 +229,14 @@ void Ship::move(SDL_Rect* walls, SDL_Rect finish)
 
             yPos += gravity;
         }
+        
        
         for (int i = 0; i < 10; i++) {
             if (checkCollision(ShipHull, walls[i]) == 4)
             {
                 xPos -= xSpeed;
             }
+            
         }
         for (int i = 0; i < 10; i++) {
             if (checkCollision(ShipHull, walls[i]) == 5)
@@ -364,7 +374,7 @@ int main(int argc, char* args[])
         printf("Failed to initialize!\n");
     }
     else
-    {   int numberOfFlor =   -1;
+    {  
         kladka = LoadTexture("loaded.png");
         texture = LoadTexture("player.png");
         meta = LoadTexture("colors.png");
@@ -395,7 +405,11 @@ int main(int argc, char* args[])
 
         //Event handler
         SDL_Event e;
-      
+        if (win) {
+            SDL_SetRenderDrawColor(gRenderer, 42, 255, 33, 255);
+            SDL_RenderClear(gRenderer);
+            SDL_RenderPresent(gRenderer);
+        }
         //While application is running
         while (!quit)
         {
