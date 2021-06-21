@@ -146,8 +146,8 @@ Player::Player()
     yPos = 100;
     jump = false;
     xSpeed = 0;
-    speed = 0.6;
-    gravity = 0.8;
+    speed = 1;
+    gravity = 0.9;
     Body.w = 32;
     Body.h = 64;
 }
@@ -157,7 +157,7 @@ float Player::getYPos() {
 }
 bool canJump;
 int oldPos;
-void Player::move(SDL_Rect* walls,SDL_Rect finish, SDL_Rect* kulki)
+void Player::move(SDL_Rect* walls, SDL_Rect finish, SDL_Rect* kulki)
 {
     for (int i = 0; i < 3; i++) {
         if (checkCollision(Body, kulki[i]) != 7) {
@@ -165,15 +165,21 @@ void Player::move(SDL_Rect* walls,SDL_Rect finish, SDL_Rect* kulki)
             xPos = 0;
             yPos = 600;
         }
-       
+
     }
 
     // cout << yPos << endl;
     offSet = getYPos();
     //xPos += xSpeed;
-    if (checkCollision(Body,finish) != 7) {
+    if (checkCollision(Body, finish) == 3) {
         cout << "wygrales!!!" << endl;
         win = true;
+
+    }
+    else if(checkCollision(Body, finish) != 7)
+    {
+        xPos -= xSpeed;
+        yPos -= xSpeed;
     }
     if (jump) {
 
@@ -181,17 +187,17 @@ void Player::move(SDL_Rect* walls,SDL_Rect finish, SDL_Rect* kulki)
             if ((checkCollision(Body, walls[i]) == 3 || yPos + Body.h > SCREEN_HEIGHT)) {
                 canJump = true;
                 oldPos = yPos;
-                
+
             }
-            if ((checkCollision(Body, walls[i]) == 6) )
+            if ((checkCollision(Body, walls[i]) == 6))
             {
                 jump = false;
             }
-               
+
         }
-        
+
         if (canJump) {
-          
+
             if (checkCollision(Body, walls[0]) != 6
                 && checkCollision(Body, walls[1]) != 6
                 && checkCollision(Body, walls[2]) != 6
@@ -202,9 +208,9 @@ void Player::move(SDL_Rect* walls,SDL_Rect finish, SDL_Rect* kulki)
                 && checkCollision(Body, walls[7]) != 6
                 && checkCollision(Body, walls[8]) != 6
                 && checkCollision(Body, walls[9]) != 6
-                
+
                 ) {
-                offSet -= 2;
+                offSet -= 3;
                 if (oldPos > yPos + 150) {
                     //cout << "Przekroczono limit wysokosci" << endl;
                     jump = false;
@@ -220,50 +226,50 @@ void Player::move(SDL_Rect* walls,SDL_Rect finish, SDL_Rect* kulki)
     xPos += xSpeed;
     Body.x = xPos;
     Body.y = yPos;
-    
-   
-        
-        if (checkCollision(Body, walls[0]) != 3
-            && checkCollision(Body, walls[1]) != 3 
-            && checkCollision(Body, walls[2]) != 3 
-            && checkCollision(Body, walls[3]) != 3
-            && checkCollision(Body, walls[4]) != 3 
-            && checkCollision(Body, walls[5]) != 3
-            && checkCollision(Body, walls[6]) != 3
-            && checkCollision(Body, walls[7]) != 3
-            && checkCollision(Body, walls[8]) != 3
-            && checkCollision(Body, walls[9]) != 3 &&
-            (yPos + Body.h < SCREEN_HEIGHT))
+
+
+
+    if (checkCollision(Body, walls[0]) != 3
+        && checkCollision(Body, walls[1]) != 3
+        && checkCollision(Body, walls[2]) != 3
+        && checkCollision(Body, walls[3]) != 3
+        && checkCollision(Body, walls[4]) != 3
+        && checkCollision(Body, walls[5]) != 3
+        && checkCollision(Body, walls[6]) != 3
+        && checkCollision(Body, walls[7]) != 3
+        && checkCollision(Body, walls[8]) != 3
+        && checkCollision(Body, walls[9]) != 3 &&
+        (yPos + Body.h < SCREEN_HEIGHT))
+    {
+
+        yPos += gravity;
+    }
+
+
+    for (int i = 0; i < 10; i++) {
+        if (checkCollision(Body, walls[i]) == 4)
+        {
+            xPos -= xSpeed;
+        }
+
+    }
+    for (int i = 0; i < 10; i++) {
+        if (checkCollision(Body, walls[i]) == 5)
+        {
+            xPos -= xSpeed;
+        }
+    }
+
+    for (int i = 0; i < 10; i++) {
+        if (checkCollision(Body, walls[i]) == 6)
         {
 
-            yPos += gravity;
+            xPos += xSpeed;
         }
-        
-       
-        for (int i = 0; i < 10; i++) {
-            if (checkCollision(Body, walls[i]) == 4)
-            {
-                xPos -= xSpeed;
-            }
-            
-        }
-        for (int i = 0; i < 10; i++) {
-            if (checkCollision(Body, walls[i]) == 5)
-            {
-                xPos -= xSpeed;
-            }
-        }
-        
-        for (int i = 0; i < 10; i++) {
-            if (checkCollision(Body, walls[i]) == 6)
-            {
+    }
 
-                xPos += xSpeed;
-            }
-        }
-        
-        
-    
+
+
     if (xPos < 0 || xPos + Body.w > SCREEN_WIDTH)
     {
         xPos -= xSpeed;
@@ -273,7 +279,7 @@ void Player::move(SDL_Rect* walls,SDL_Rect finish, SDL_Rect* kulki)
 }
 int checkCollision(SDL_Rect a, SDL_Rect b)
 {
-    
+
 
     int leftA, leftB;
     int rightA, rightB;
@@ -383,14 +389,14 @@ int main(int argc, char* args[])
         printf("Failed to initialize!\n");
     }
     else
-    {  
+    {
         tlo = LoadTexture("background.png");
         kladka = LoadTexture("loaded.png");
         texture = LoadTexture("player.png");
-        meta = LoadTexture("colors.png");
-        kula = LoadTexture("colors.png");
+        meta = LoadTexture("meta.png");
+        kula = LoadTexture("kulka.png");
         for (int i = 0; i < 10; i++) {
-            floors[i].w = 130 - i*10;
+            floors[i].w = 130 - i * 10;
             floors[i].h = 30;
         }
         for (int x = 0; x < 3; x++) {
@@ -404,11 +410,11 @@ int main(int argc, char* args[])
         obstacle[1].y = 300;
         obstacle[2].x = 770;
         obstacle[2].y = 300;
-       
+
         finish.w = 100;
-        finish.h = 100;
+        finish.h = 32;
         finish.x = 850;
-        finish.y = 640;
+        finish.y = 240;
         floors[0].x = 300;
         floors[0].y = 640;
         floors[1].x = 200;
@@ -422,13 +428,13 @@ int main(int argc, char* args[])
         floors[4].y = 340;
         floors[5].x = 590;
         floors[5].y = 240;
-       
+
         //Main loop flag
         bool quit = false;
 
         //Event handler
         SDL_Event e;
-        
+
         //While application is running
         while (!quit && !win)
         {
@@ -447,8 +453,8 @@ int main(int argc, char* args[])
             player.move(floors, finish, obstacle);
 
             //Clear screen
-            
-         
+
+
 
             SDL_RenderClear(gRenderer);
 
@@ -467,17 +473,17 @@ int main(int argc, char* args[])
                 }
                 else
                     obstacle[i].y -= 1;
-           }
+            }
 
-           
 
-          
-                
-            
-            
-            
+
+
+
+
+
+
             //player.x = Time() / 5;
-            SDL_RenderCopy(gRenderer, tlo , NULL, NULL);
+            SDL_RenderCopy(gRenderer, tlo, NULL, NULL);
             //SDL_RenderCopy(gRenderer, kladka, &screenRect, &obstacle);
             for (int i = 0; i < 10; i++) {
                 SDL_RenderCopy(gRenderer, kladka, &screenRect, &floors[i]);
@@ -486,7 +492,7 @@ int main(int argc, char* args[])
                 SDL_RenderCopy(gRenderer, kula, &screenRect, &obstacle[i]);
             }
             SDL_RenderCopy(gRenderer, meta, &screenRect, &finish);
-           
+
             //render textury
             SDL_RenderCopyEx(gRenderer, texture, NULL, &player.Body, angle, NULL, flip);
 
