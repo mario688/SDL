@@ -34,12 +34,14 @@ SDL_Texture* LoadTexture(std::string file);
 //The window renderer
 SDL_Renderer* gRenderer = NULL;
 
-SDL_Texture* texture = NULL;
+SDL_Texture* playerTexture = NULL;
 double angle = 0;
 SDL_Texture* kladka = NULL;
 SDL_Texture* meta = NULL;
 SDL_Texture* kula = NULL;
 SDL_Texture* tlo = NULL;
+SDL_Texture* playerJumpTexture = NULL;
+SDL_Texture* currentTexture = NULL;
 SDL_RendererFlip flip = SDL_FLIP_NONE;
 using namespace std;
 string direction = "left";
@@ -142,8 +144,8 @@ public:
 Player::Player()
 {
     offSet = 0;
-    xPos = 100;
-    yPos = 100;
+    xPos = 0;
+    yPos = 600;
     jump = false;
     xSpeed = 0;
     speed = 1;
@@ -164,6 +166,7 @@ void Player::move(SDL_Rect* walls, SDL_Rect finish, SDL_Rect* kulki)
             cout << "AUĆ!!" << endl;
             xPos = 0;
             yPos = 600;
+
         }
 
     }
@@ -182,7 +185,7 @@ void Player::move(SDL_Rect* walls, SDL_Rect finish, SDL_Rect* kulki)
         yPos -= xSpeed;
     }
     if (jump) {
-
+        currentTexture = playerJumpTexture;
         for (int i = 0; i < 10; i++) {
             if ((checkCollision(Body, walls[i]) == 3 || yPos + Body.h > SCREEN_HEIGHT)) {
                 canJump = true;
@@ -222,6 +225,8 @@ void Player::move(SDL_Rect* walls, SDL_Rect finish, SDL_Rect* kulki)
 
         yPos = offSet;
     }
+    else
+        currentTexture = playerTexture;
 
     xPos += xSpeed;
     Body.x = xPos;
@@ -329,7 +334,7 @@ void Player::handleEvent(SDL_Event& e)
         case SDLK_UP:
             jump = true;
 
-
+            
             direction = "up";
             break;
         case SDLK_DOWN:
@@ -390,18 +395,21 @@ int main(int argc, char* args[])
     }
     else
     {
+      
         tlo = LoadTexture("background.png");
         kladka = LoadTexture("loaded.png");
-        texture = LoadTexture("player.png");
+        playerTexture = LoadTexture("player.png");
+        playerJumpTexture = LoadTexture("jumpedPlayer.png");
         meta = LoadTexture("meta.png");
         kula = LoadTexture("kulka.png");
+        currentTexture = playerTexture;
         for (int i = 0; i < 10; i++) {
             floors[i].w = 130 - i * 10;
             floors[i].h = 30;
         }
         for (int x = 0; x < 3; x++) {
             obstacle[x].w = 30;
-            obstacle[x].h = 30;
+            obstacle[x].h = 60;
         }
 
         obstacle[0].x = 300;
@@ -494,7 +502,7 @@ int main(int argc, char* args[])
             SDL_RenderCopy(gRenderer, meta, &screenRect, &finish);
 
             //render textury
-            SDL_RenderCopyEx(gRenderer, texture, NULL, &player.Body, angle, NULL, flip);
+            SDL_RenderCopyEx(gRenderer, currentTexture, NULL, &player.Body, angle, NULL, flip);
 
             //Update screen
             SDL_RenderPresent(gRenderer);
