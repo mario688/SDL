@@ -176,7 +176,7 @@ void Player::move(SDL_Rect* walls, SDL_Rect finish, SDL_Rect* kulki)
         win = true;
 
     }
-    else if(checkCollision(Body, finish) != 7)
+    else if (checkCollision(Body, finish) != 7)
     {
         xPos -= xSpeed;
         yPos -= xSpeed;
@@ -210,7 +210,7 @@ void Player::move(SDL_Rect* walls, SDL_Rect finish, SDL_Rect* kulki)
                 && checkCollision(Body, walls[9]) != 6
 
                 ) {
-                offSet -= 3;
+                offSet -= 2.5;
                 if (oldPos > yPos + 150) {
                     //cout << "Przekroczono limit wysokosci" << endl;
                     jump = false;
