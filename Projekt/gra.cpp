@@ -38,7 +38,8 @@ SDL_Texture* texture = NULL;
 double angle = 0;
 SDL_Texture* kladka = NULL;
 SDL_Texture* meta = NULL;
-
+SDL_Texture* kula = NULL;
+SDL_Texture* tlo = NULL;
 SDL_RendererFlip flip = SDL_FLIP_NONE;
 using namespace std;
 string direction = "left";
@@ -121,14 +122,14 @@ void close()
     SDL_Quit();
 }
 
-class Ship
+class Player
 {
 public:
-    SDL_Rect ShipHull;
-    Ship();
+    SDL_Rect Body;
+    Player();
     float getYPos();
     void handleEvent(SDL_Event& e);
-    int offSet;
+    float offSet;
     float xPos;
     float yPos;
     float xSpeed;
@@ -136,46 +137,53 @@ public:
     bool jump;
     float speed;
     float gravity;
-    void move(SDL_Rect walls[10], SDL_Rect finish);
+    void move(SDL_Rect walls[10], SDL_Rect finish, SDL_Rect kulki[3]);
 };
-Ship::Ship()
+Player::Player()
 {
     offSet = 0;
     xPos = 100;
     yPos = 100;
     jump = false;
     xSpeed = 0;
-    speed = 0.3;
-    gravity = 0.4;
-    ShipHull.w = 32;
-    ShipHull.h = 64;
+    speed = 0.6;
+    gravity = 0.8;
+    Body.w = 32;
+    Body.h = 64;
 }
 
-float Ship::getYPos() {
+float Player::getYPos() {
     return yPos;
 }
 bool canJump;
 int oldPos;
-void Ship::move(SDL_Rect* walls, SDL_Rect finish)
+void Player::move(SDL_Rect* walls,SDL_Rect finish, SDL_Rect* kulki)
 {
-    
+    for (int i = 0; i < 3; i++) {
+        if (checkCollision(Body, kulki[i]) != 7) {
+            cout << "AUĆ!!" << endl;
+            xPos = 0;
+            yPos = 600;
+        }
+       
+    }
 
     // cout << yPos << endl;
     offSet = getYPos();
     //xPos += xSpeed;
-    if (checkCollision(ShipHull,finish) != 7) {
+    if (checkCollision(Body,finish) != 7) {
         cout << "wygrales!!!" << endl;
         win = true;
     }
     if (jump) {
 
         for (int i = 0; i < 10; i++) {
-            if ((checkCollision(ShipHull, walls[i]) == 3 || yPos + ShipHull.h > SCREEN_HEIGHT)) {
+            if ((checkCollision(Body, walls[i]) == 3 || yPos + Body.h > SCREEN_HEIGHT)) {
                 canJump = true;
                 oldPos = yPos;
                 
             }
-            if ((checkCollision(ShipHull, walls[i]) == 6))
+            if ((checkCollision(Body, walls[i]) == 6) )
             {
                 jump = false;
             }
@@ -184,19 +192,19 @@ void Ship::move(SDL_Rect* walls, SDL_Rect finish)
         
         if (canJump) {
           
-            if (checkCollision(ShipHull, walls[0]) != 6
-                && checkCollision(ShipHull, walls[1]) != 6
-                && checkCollision(ShipHull, walls[2]) != 6
-                && checkCollision(ShipHull, walls[3]) != 6
-                && checkCollision(ShipHull, walls[4]) != 6
-                && checkCollision(ShipHull, walls[5]) != 6
-                && checkCollision(ShipHull, walls[6]) != 6
-                && checkCollision(ShipHull, walls[7]) != 6
-                && checkCollision(ShipHull, walls[8]) != 6
-                && checkCollision(ShipHull, walls[9]) != 6
+            if (checkCollision(Body, walls[0]) != 6
+                && checkCollision(Body, walls[1]) != 6
+                && checkCollision(Body, walls[2]) != 6
+                && checkCollision(Body, walls[3]) != 6
+                && checkCollision(Body, walls[4]) != 6
+                && checkCollision(Body, walls[5]) != 6
+                && checkCollision(Body, walls[6]) != 6
+                && checkCollision(Body, walls[7]) != 6
+                && checkCollision(Body, walls[8]) != 6
+                && checkCollision(Body, walls[9]) != 6
                 
                 ) {
-                offSet -= 1;
+                offSet -= 2;
                 if (oldPos > yPos + 150) {
                     //cout << "Przekroczono limit wysokosci" << endl;
                     jump = false;
@@ -208,23 +216,24 @@ void Ship::move(SDL_Rect* walls, SDL_Rect finish)
 
         yPos = offSet;
     }
+
     xPos += xSpeed;
-    ShipHull.x = xPos;
-    ShipHull.y = yPos;
+    Body.x = xPos;
+    Body.y = yPos;
     
    
         
-        if (checkCollision(ShipHull, walls[0]) != 3
-            && checkCollision(ShipHull, walls[1]) != 3 
-            && checkCollision(ShipHull, walls[2]) != 3 
-            && checkCollision(ShipHull, walls[3]) != 3
-            && checkCollision(ShipHull, walls[4]) != 3 
-            && checkCollision(ShipHull, walls[5]) != 3
-            && checkCollision(ShipHull, walls[6]) != 3
-            && checkCollision(ShipHull, walls[7]) != 3
-            && checkCollision(ShipHull, walls[8]) != 3
-            && checkCollision(ShipHull, walls[9]) != 3 &&
-            (yPos + ShipHull.h < SCREEN_HEIGHT))
+        if (checkCollision(Body, walls[0]) != 3
+            && checkCollision(Body, walls[1]) != 3 
+            && checkCollision(Body, walls[2]) != 3 
+            && checkCollision(Body, walls[3]) != 3
+            && checkCollision(Body, walls[4]) != 3 
+            && checkCollision(Body, walls[5]) != 3
+            && checkCollision(Body, walls[6]) != 3
+            && checkCollision(Body, walls[7]) != 3
+            && checkCollision(Body, walls[8]) != 3
+            && checkCollision(Body, walls[9]) != 3 &&
+            (yPos + Body.h < SCREEN_HEIGHT))
         {
 
             yPos += gravity;
@@ -232,21 +241,21 @@ void Ship::move(SDL_Rect* walls, SDL_Rect finish)
         
        
         for (int i = 0; i < 10; i++) {
-            if (checkCollision(ShipHull, walls[i]) == 4)
+            if (checkCollision(Body, walls[i]) == 4)
             {
                 xPos -= xSpeed;
             }
             
         }
         for (int i = 0; i < 10; i++) {
-            if (checkCollision(ShipHull, walls[i]) == 5)
+            if (checkCollision(Body, walls[i]) == 5)
             {
                 xPos -= xSpeed;
             }
         }
         
         for (int i = 0; i < 10; i++) {
-            if (checkCollision(ShipHull, walls[i]) == 6)
+            if (checkCollision(Body, walls[i]) == 6)
             {
 
                 xPos += xSpeed;
@@ -255,7 +264,7 @@ void Ship::move(SDL_Rect* walls, SDL_Rect finish)
         
         
     
-    if (xPos < 0 || xPos + ShipHull.w > SCREEN_WIDTH)
+    if (xPos < 0 || xPos + Body.w > SCREEN_WIDTH)
     {
         xPos -= xSpeed;
     }
@@ -304,7 +313,7 @@ int checkCollision(SDL_Rect a, SDL_Rect b)
 
     return 7;
 }
-void Ship::handleEvent(SDL_Event& e)
+void Player::handleEvent(SDL_Event& e)
 {
     if (e.type == SDL_KEYDOWN && e.key.repeat == 0)
     {
@@ -363,10 +372,10 @@ void Ship::handleEvent(SDL_Event& e)
 
 int main(int argc, char* args[])
 {
-    
-    Ship ship;
+    bool doPrzodu = true;
+    Player player;
     SDL_Rect screenRect = { 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT };
-    bool doPrzodu = false;
+    SDL_Rect obstacle[3];
     SDL_Rect floors[10];
     SDL_Rect finish;
     if (!init())
@@ -375,13 +384,26 @@ int main(int argc, char* args[])
     }
     else
     {  
+        tlo = LoadTexture("background.png");
         kladka = LoadTexture("loaded.png");
         texture = LoadTexture("player.png");
         meta = LoadTexture("colors.png");
+        kula = LoadTexture("colors.png");
         for (int i = 0; i < 10; i++) {
             floors[i].w = 130 - i*10;
             floors[i].h = 30;
         }
+        for (int x = 0; x < 3; x++) {
+            obstacle[x].w = 30;
+            obstacle[x].h = 30;
+        }
+
+        obstacle[0].x = 300;
+        obstacle[0].y = 300;
+        obstacle[1].x = 600;
+        obstacle[1].y = 300;
+        obstacle[2].x = 770;
+        obstacle[2].y = 300;
        
         finish.w = 100;
         finish.h = 100;
@@ -398,22 +420,19 @@ int main(int argc, char* args[])
         floors[3].y = 340;
         floors[4].x = 450;
         floors[4].y = 340;
-
+        floors[5].x = 590;
+        floors[5].y = 240;
        
         //Main loop flag
         bool quit = false;
 
         //Event handler
         SDL_Event e;
-        if (win) {
-            SDL_SetRenderDrawColor(gRenderer, 42, 255, 33, 255);
-            SDL_RenderClear(gRenderer);
-            SDL_RenderPresent(gRenderer);
-        }
+        
         //While application is running
-        while (!quit)
+        while (!quit && !win)
         {
-            
+
             while (SDL_PollEvent(&e) != 0)
             {
                 //User requests quit
@@ -421,41 +440,55 @@ int main(int argc, char* args[])
                 {
                     quit = true;
                 }
-                ship.handleEvent(e);
+                player.handleEvent(e);
             }
-            
-         
-            ship.move(floors, finish);
+
+
+            player.move(floors, finish, obstacle);
 
             //Clear screen
-            SDL_SetRenderDrawColor(gRenderer, 42, 123, 33, 255);
+            
+         
 
             SDL_RenderClear(gRenderer);
+
+
+            for (int i = 0; i < 3; i++) {
+                if (obstacle[i].y > 400) {
+                    doPrzodu = false;
+                }
+                else if (obstacle[i].y <= 0) {
+                    doPrzodu = true;
+                }
+
+                if (doPrzodu) {
+                    obstacle[i].y += 1;
+
+                }
+                else
+                    obstacle[i].y -= 1;
+           }
+
            
-            
-           /* if (floors[4].x == 500) {
-                doPrzodu = true;
-            }
-            else if (floors[4].x == 800) {
-                doPrzodu = false;
-            }
-             
-            if (doPrzodu) {
-                floors[4].x += Time() * 0.01;
-            }else if(!doPrzodu)
-                floors[4].x -= Time() * 0.01;*/
+
+          
+                
             
             
             
             //player.x = Time() / 5;
-            SDL_SetRenderDrawColor(gRenderer, 42, 255, 255, 255);
+            SDL_RenderCopy(gRenderer, tlo , NULL, NULL);
             //SDL_RenderCopy(gRenderer, kladka, &screenRect, &obstacle);
             for (int i = 0; i < 10; i++) {
                 SDL_RenderCopy(gRenderer, kladka, &screenRect, &floors[i]);
             }
+            for (int i = 0; i < 3; i++) {
+                SDL_RenderCopy(gRenderer, kula, &screenRect, &obstacle[i]);
+            }
             SDL_RenderCopy(gRenderer, meta, &screenRect, &finish);
+           
             //render textury
-            SDL_RenderCopyEx(gRenderer, texture, NULL, &ship.ShipHull, angle, NULL, flip);
+            SDL_RenderCopyEx(gRenderer, texture, NULL, &player.Body, angle, NULL, flip);
 
             //Update screen
             SDL_RenderPresent(gRenderer);
