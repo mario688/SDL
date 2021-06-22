@@ -29,6 +29,7 @@ int checkCollision(SDL_Rect a, SDL_Rect b);
 //The window we'll be rendering to
 SDL_Window* gWindow = NULL;
 bool win = false;
+bool menu = true;
 SDL_Texture* LoadTexture(std::string file);
 
 //The window renderer
@@ -36,12 +37,16 @@ SDL_Renderer* gRenderer = NULL;
 
 SDL_Texture* playerTexture = NULL;
 double angle = 0;
+
 SDL_Texture* kladka = NULL;
 SDL_Texture* meta = NULL;
 SDL_Texture* kula = NULL;
+SDL_Texture* menuBackground = NULL;
 SDL_Texture* tlo = NULL;
 SDL_Texture* playerJumpTexture = NULL;
 SDL_Texture* currentTexture = NULL;
+SDL_Texture* fallDown = NULL;
+SDL_Texture* winBackground = NULL;
 SDL_RendererFlip flip = SDL_FLIP_NONE;
 using namespace std;
 string direction = "left";
@@ -194,6 +199,7 @@ void Player::move(SDL_Rect* walls, SDL_Rect finish, SDL_Rect* kulki)
             }
             if ((checkCollision(Body, walls[i]) == 6))
             {
+               
                 jump = false;
             }
 
@@ -248,6 +254,10 @@ void Player::move(SDL_Rect* walls, SDL_Rect finish, SDL_Rect* kulki)
     {
 
         yPos += gravity;
+        if (!jump) {
+            currentTexture = fallDown;
+        }
+        
     }
 
 
@@ -268,7 +278,7 @@ void Player::move(SDL_Rect* walls, SDL_Rect finish, SDL_Rect* kulki)
     for (int i = 0; i < 10; i++) {
         if (checkCollision(Body, walls[i]) == 6)
         {
-
+            
             xPos += xSpeed;
         }
     }
@@ -338,8 +348,6 @@ void Player::handleEvent(SDL_Event& e)
             direction = "up";
             break;
         case SDLK_DOWN:
-            // cos zrobic
-
             direction = "down";
             break;
         case SDLK_LEFT:
@@ -348,16 +356,24 @@ void Player::handleEvent(SDL_Event& e)
             xSpeed -= speed;
             break;
         case SDLK_RIGHT:
-
+            
             direction = "right";
 
             xSpeed += speed;
             break;
+        case SDLK_SPACE:
+            win = false;
+            menu = false;
+            break;
+        case SDLK_ESCAPE:
+            close();
+            break;
         }
+
     }
     else if (e.type == SDL_KEYUP && e.key.repeat == 0)
     {
-        //Adjust the velocity
+        
         switch (e.key.keysym.sym)
         {
         case SDLK_UP:
@@ -395,11 +411,13 @@ int main(int argc, char* args[])
     }
     else
     {
-      
+        menuBackground = LoadTexture("menuBackground.png");
+        winBackground = LoadTexture("winBackground.png");
         tlo = LoadTexture("background.png");
         kladka = LoadTexture("loaded.png");
         playerTexture = LoadTexture("player.png");
         playerJumpTexture = LoadTexture("jumpedPlayer.png");
+        fallDown = LoadTexture("fallDown.png");
         meta = LoadTexture("meta.png");
         kula = LoadTexture("kulka.png");
         currentTexture = playerTexture;
@@ -444,7 +462,7 @@ int main(int argc, char* args[])
         SDL_Event e;
 
         //While application is running
-        while (!quit && !win)
+        while (!quit)
         {
 
             while (SDL_PollEvent(&e) != 0)
@@ -484,25 +502,31 @@ int main(int argc, char* args[])
             }
 
 
-
-
-
-
-
-
             //player.x = Time() / 5;
-            SDL_RenderCopy(gRenderer, tlo, NULL, NULL);
-            //SDL_RenderCopy(gRenderer, kladka, &screenRect, &obstacle);
-            for (int i = 0; i < 10; i++) {
-                SDL_RenderCopy(gRenderer, kladka, &screenRect, &floors[i]);
-            }
-            for (int i = 0; i < 3; i++) {
-                SDL_RenderCopy(gRenderer, kula, &screenRect, &obstacle[i]);
-            }
-            SDL_RenderCopy(gRenderer, meta, &screenRect, &finish);
+            if (menu) {
+                SDL_RenderCopy(gRenderer, menuBackground, NULL, NULL);
+            }else if(!win && !menu ) 
+            {
 
-            //render textury
-            SDL_RenderCopyEx(gRenderer, currentTexture, NULL, &player.Body, angle, NULL, flip);
+                SDL_RenderCopy(gRenderer, tlo, NULL, NULL);
+               
+                for (int i = 0; i < 10; i++) {
+                    SDL_RenderCopy(gRenderer, kladka, &screenRect, &floors[i]);
+                }
+                for (int i = 0; i < 3; i++) {
+                    SDL_RenderCopy(gRenderer, kula, &screenRect, &obstacle[i]);
+                }
+                SDL_RenderCopy(gRenderer, meta, &screenRect, &finish);
+
+                //render textury
+                SDL_RenderCopyEx(gRenderer, currentTexture, NULL, &player.Body, angle, NULL, flip);
+
+            }
+            else {
+                
+                SDL_RenderCopy(gRenderer, winBackground, NULL, NULL);
+            }
+           
 
             //Update screen
             SDL_RenderPresent(gRenderer);
